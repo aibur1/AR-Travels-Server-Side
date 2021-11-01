@@ -49,13 +49,31 @@ async function run() {
             res.json(offer);
         });
 
+
+        //UPDATE API
+        app.put('/offers/:id', async (req, res) => {
+            const id = req.params.id;
+            const updatedUser = req.body;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set:{
+                  name:updatedUser.name,
+                  price:updatedUser.price
+                },
+            };
+            const result = await offerCollection.updateOne(filter, updateDoc, options)
+            console.log('updating user', id);
+            res.json(result);
+        });
+
         // DELETE API
         app.delete('/offers/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const result = await offerCollection.deleteOne(query);
             res.json(result);
-        })
+        });
 
 
     }
