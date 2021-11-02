@@ -22,6 +22,7 @@ async function run() {
         await client.connect();
         const database = client.db('travels');
         const offerCollection = database.collection('offers');
+        const orderCollection = database.collection('orders');
 
         // POST API
         app.post('/offers', async (req, res) => {
@@ -32,6 +33,24 @@ async function run() {
             res.json(result)
 
         });
+
+        //ADD Orders API
+        app.get('/orders', async (req, res) => {
+            let query = {};
+            const email = req.query.email;
+            if(email) {
+               query = {email:email}
+            }
+            const cursor = orderCollection.find(query);
+            const orders = await cursor.toArray();
+            res.json(orders);
+        });
+        app.post('/orders', async (req, res) => {
+            const order = req.body;
+            order.createdAt = new Date();
+            const result = await orderCollection.insertOne(order);
+            res.json(result);
+        })
 
         //GET Offers API
         app.get('/offers', async (req, res) => {
@@ -57,9 +76,9 @@ async function run() {
             const filter = { _id: ObjectId(id) };
             const options = { upsert: true };
             const updateDoc = {
-                $set:{
-                  name:updatedUser.name,
-                  price:updatedUser.price
+                $set: {
+                    name: updatedUser.name,
+                    price: updatedUser.price
                 },
             };
             const result = await offerCollection.updateOne(filter, updateDoc, options)
